@@ -2,10 +2,10 @@ const express = require("express");
 const users = require("./routes/user-routes");
 const mongoose = require("mongoose");
 const app = express();
-const SERVER_PORT = process.env.PORT || 8000;
+const SERVER_PORT = process.env.PORT || 3000;
 
 app.use(express.json());
-app.use("/", users);
+app.use("/",users);
 
 mongoose.connect("mongodb+srv://fall2022_comp3123:SAFA.aru1993@cluster0.lclqo7i.mongodb.net/lab5?retryWrites=true&w=majority", {
   useNewUrlParser: true,

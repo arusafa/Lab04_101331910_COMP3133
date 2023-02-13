@@ -1,64 +1,122 @@
-const mongoose = require('mongoose');
-const validator = require('validator');
+const mongoose = require("mongoose");
 
-const userModel = new mongoose.Schema({
+const userSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+    trim: true,
+  },
   username: {
     type: String,
     required: true,
-    minlength: 4
+    minlength: 4,
+    trim: true,
   },
   email: {
     type: String,
     required: true,
+    trim: true,
     validate: {
-      validator: (value) => {
-        return validator.isEmail(value);
+      validator: function (value) {
+        let emailRegex = /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/;
+        return emailRegex.test(value);
       },
-      message: 'Invalid email address'
-    }
+      message:
+        "Email format is not valid",
+    },
   },
-  city: {
-    type: String,
-    required: true,
-    validate: {
-      validator: (value) => {
-        return /^[a-zA-Z\s]+$/.test(value);
+  address: {
+    street: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    suite: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    city: {
+      type: String,
+      required: true,
+      trim: true,
+      validate: {
+        validator: function (value) {
+          let cityRegex = /^[A-Za-z.\s ]+$/;
+          return cityRegex.test(value);
+        },
+        message:
+          "City format is not valid",
       },
-      message: 'City name must only contain alphabets and spaces'
-    }
-  },
-  website: {
-    type: String,
-    required: true,
-    validate: {
-      validator: (value) => {
-        return validator.isURL(value, { protocols: ['http', 'https'] });
+    },
+    zipcode: {
+      type: String,
+      required: true,
+      trim: true,
+      validate: {
+        validator: function (value) {
+          let zipRegex = /\b\d{5}\b-\b\d{4}\b/g;
+          return zipRegex.test(value);
+        },
+        message:
+          "Zipcode format is not valid",
       },
-      message: 'Invalid URL address'
-    }
-  },
-  zipCode: {
-    type: String,
-    required: true,
-    validate: {
-      validator: (value) => {
-        return /^\d{5}-\d{4}$/.test(value);
+    },
+    geo: {
+      lat: {
+        type: Number,
+        required: true,
       },
-      message: 'Zip code format must be DDDDD-DDDD (D = digit)'
-    }
+      lng: {
+        type: Number,
+        required: true,
+      },
+    },
   },
   phone: {
     type: String,
     required: true,
+    trim: true,
     validate: {
-      validator: (value) => {
-        return /^\d{1}-\d{3}-\d{3}-\d{4}$/.test(value);
+      validator: function (value) {
+        let phoneRegex = /\b\d{1}\b-\b\d{3}\b-\b\d{3}\b-\b\d{4}\b/g;
+        return phoneRegex.test(value);
       },
-      message: 'Phone format must be D-DDD-DDD-DDD (D = digit)'
-    }
-  }
+      message:
+        "Phone format is not valid",
+    },
+  },
+  website: {
+    type: String,
+    required: true,
+    trim: true,
+    validate: {
+      validator: function (value) {
+        let urlRegex = /^(http|https):\/\/[^ "]+$/;
+        return urlRegex.test(value);
+      },
+      message:
+        "Website format is not valid",
+    },
+  },
+  company: {
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    catchPhrase: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    bs: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+  },
 });
 
-const User = mongoose.model('User', userModel);
-
+const User = mongoose.model("User", userSchema);
 module.exports = User;

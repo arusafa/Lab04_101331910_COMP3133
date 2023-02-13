@@ -1,57 +1,46 @@
-const express = require('express');
-const router = express.Router();
-const UserModelPath = require('../models/UserModel');
+const express = require("express");
+const User = require("../models/UserModel");
+const Examples = require("../UsersData.json");
 
-// Sign up
-/*
-{
-    "username": "testuser",
-    "email": "test@test.com",
-    "city": "testcity",
-    "website": "http://test.com",
-    "zipCode": "12345-1234",
-    "phone": "1-123-123-1234"
-}
- */
+const app = express();
 
-router.post('/users', async (req, res) => {
-    
-    const user = new UserModelPath({
-        username: req.body.username,
-        email: req.body.email,
-        password: req.body.password,
-        city: req.body.city,
-        website: req.body.website,
-        zipCode: req.body.zipCode,
-        phone: req.body.phone
+app.post("/users", async (req, res) => {
+  if (!req.body) {
+    return res.status(400).send({
+      message: "User cannot be empty.",
     });
-    try {
-        const newUser = await user.save();
-        res.status(201).json(newUser)
-    } 
-    catch (er){
-        res.status(400).json({message:er});
-    }
+  }
+
+  try {
+    const user = new User(req.body);
+    await user.save();
+    return res.status(200).send(`Users added successfully!\n" ${user}`);
+  } catch (err) {
+    res.status(500).send(err);
+  }
 });
 
-// Log in
-
-router.post('/account/login', async (req, res) => {
-
-    const { username, password } = req.body;
-    const user = await UserModelPath.findOne({
-
-        username: username,
-        password: password
+app.post("/examples", async (req, res) => {
+  User.insertMany(Examples)
+    .then(() => {
+      res.status(200).send("Examples added successfully");
     })
-
-    if(user.password === password) {
-        res.status(200).json({"username": user.username, "password": user.password})
-    }
-    else {
-
-        res.status(400).send('Invalid username or Incorrect password');
-    }
+    .catch((err) => {
+      console.log(err);
+    });
 });
- 
-module.exports = router;
+
+app.post("account/login", async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const user = await User.findByCredentials(email, password);
+    const token = await user.generateAuthToken();
+    res.send({ user, token });
+    console.log("User logged in successfully");
+  } catch (err) {
+    console.log(err);
+  }
+});
+
+module.exports = app;
